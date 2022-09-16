@@ -59,20 +59,18 @@ static bool do_external_copy(std::string_view source, std::string_view destinati
     if ((pid = fork()) == 0) {
         ((char *)source.data())[source.size()] = '\0';
         execl("/bin/cp", "mv", "-rp", source.data(), destination.data(), NULL);
-        std::cerr << "Failed to exec cp !\n";
+        std::cerr << "mv: Failed to exec cp !\n";
         std::exit(1);
     }
     waitpid(pid, &status, 0);
     if (!WIFEXITED(status) || WEXITSTATUS(status))
         return true;
-    if ((pid = fork()) == 0) {
-        ((char *)source.data())[source.size()] = '\0';
-        execl("/bin/rm", "mv", "-rf", source.data(), NULL);
-        std::cerr << "Failed to exec cp !\n";
-        std::exit(1);
+    auto rmall_result = std::filesystem::remove_all(source, error);
+    if (rmall_result == static_cast<std::uintmax_t>(-1)) {
+        std::cerr << fmt::format("mv: Error while trying to remove source directory: {}\n", error.message());
+        return true;
     }
-    waitpid(pid, &status, 0);
-    return !WIFEXITED(status) || WEXITSTATUS(status);
+    return false;
 }
 
 static bool do_move(const mv_options &opts, std::string_view source, std::string_view destination)
