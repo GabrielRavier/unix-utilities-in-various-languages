@@ -51,9 +51,10 @@ static bool do_external_copy(std::string_view source, std::string_view destinati
 {
     pid_t pid;
     int status;
+    std::error_code error;
 
     ((char *)destination.data())[destination.size()] = '\0';
-    if (rmdir(destination.data()) != 0 && errno == ENOTEMPTY)
+    if (std::filesystem::is_directory(destination) && !std::filesystem::remove(destination, error) && error.value() == ENOTEMPTY)
         return true;
     if ((pid = fork()) == 0) {
         ((char *)source.data())[source.size()] = '\0';
