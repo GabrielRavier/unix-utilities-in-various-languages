@@ -1,7 +1,7 @@
 With this project, I'm aiming to write implementations of various UNIX utilities, using various languages.
 
 
-It should be possible to build everything into the bin/ directory by just using
+It should be possible to build everything into the ./bin/ directory by just using
 
 make
 
