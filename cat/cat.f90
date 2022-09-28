@@ -1,16 +1,31 @@
 module cat
+  use f90getopt
   implicit none
   
   type :: state
      integer :: unused
      integer :: input_unit
      character(len=1000) :: filename
+     logical :: show_ends
   end type state
 
 contains
 
   subroutine setup(self)
     type (state) :: self
+    type(option_s) :: opts(1)
+
+    opts(1) = option_s("show-ends", .false., "E")
+
+    do
+       select case(getopt("E", opts))
+       case(char(0)) ! All options processed
+          exit
+       case("E")
+          self%show_ends = .true.
+       end select
+    end do
+
   end subroutine setup
 
   function simple_cat(self) result(success)
@@ -31,6 +46,10 @@ contains
           return
        end if
 
+       if (self%show_ends .and. tmp == new_line('a')) then
+          write(12) "$"
+       end if
+
        write(12) tmp
        
     end do
@@ -40,14 +59,15 @@ contains
 end module cat
 
 program main
+  use f90getopt
   use cat
   implicit none
 
   type(state) :: self
   integer(4) :: argind
   logical :: ok
-
   character(1024) :: stdout_filename
+
   inquire(6, name = stdout_filename)
   open(12, file = stdout_filename, access = 'stream', action = 'write')
   close(6)
@@ -56,7 +76,7 @@ program main
   call setup(self)
 
   ok = .true.
-  argind = 1
+  argind = optind
   self%filename = "-"
 
   do
@@ -69,7 +89,7 @@ program main
         self%filename = "/dev/stdin"
      end if
 
-     open(unit=self%input_unit, file=self%filename, access='STREAM', form='UNFORMATTED')
+     open(unit=self%input_unit, file=self%filename, access='STREAM', form='UNFORMATTED', readonly)
 
      if (simple_cat(self)) then
         ok = .false.
