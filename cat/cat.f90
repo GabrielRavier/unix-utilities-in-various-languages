@@ -7,22 +7,26 @@ module cat
      integer :: input_unit
      character(len=1000) :: filename
      logical :: show_ends
+     logical :: show_tabs
   end type state
 
 contains
 
   subroutine setup(self)
     type (state) :: self
-    type(option_s) :: opts(1)
+    type (option_s) :: opts(2)
 
     opts(1) = option_s("show-ends", .false., "E")
+    opts(2) = option_s("show-tabs", .false., "T")
 
     do
-       select case(getopt("E", opts))
+       select case(getopt("ET", opts))
        case(char(0)) ! All options processed
           exit
        case("E")
           self%show_ends = .true.
+       case("T")
+          self%show_tabs = .true.
        end select
     end do
 
@@ -44,6 +48,11 @@ contains
        else if (reason < 0) then
           success = .true.
           return
+       end if
+
+       if (self%show_tabs .and. tmp == char(9)) then
+          write(12) "^"
+          tmp = "I"
        end if
 
        if (self%show_ends .and. tmp == new_line('a')) then
