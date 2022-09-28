@@ -1,10 +1,10 @@
 module cat
-
   implicit none
   
   type :: state
      integer :: unused
      integer :: input_unit
+     character(len=1000) :: filename
   end type state
 
 contains
@@ -16,18 +16,24 @@ contains
   function simple_cat(self) result(success)
     type (state) :: self
     logical :: success
+    character(len=1) :: tmp
+    integer :: reason
 
     do
-       character :: tmp
 
-       read (unit=self%input_unit, end=retlab) character
-       print *,character
+       read (unit=self%input_unit, iostat=reason) tmp
+       if (reason > 0) then
+          call perror(self%filename)
+          success = .false.
+          return
+       else if (reason < 0) then
+          success = .true.
+          return
+       end if
+
+       write(12) tmp
        
     end do
-
-    retlab:
-    success = .true.
-    return
 
   end function simple_cat
 
@@ -38,30 +44,46 @@ program main
   implicit none
 
   type(state) :: self
+  integer(4) :: argind
+  logical :: ok
+
+  character(1024) :: stdout_filename
+  inquire(6, name = stdout_filename)
+  open(12, file = stdout_filename, access = 'stream', action = 'write')
+  close(6)
+  close(5)
+  
   call setup(self)
 
-  character(len=1000) :: filename
-  integer :: argind
+  ok = .true.
   argind = 1
+  self%filename = "-"
 
   do
-     if (argind < iargc()) then
-        get_command_argument(argind, filename)
+     if (argind <= iargc()) then
+        call get_command_argument(argind, self%filename)
      end if
 
      self%input_unit = 9 ! first free unit id
-     if (filename == "-") then
-        self%input_unit = 5 ! 5 is stdin
-     else
-        open(unit=self%input_unit, file=filename, access='STREAM', form='UNFORMATTED')
+     if (self%filename == "-") then
+        self%filename = "/dev/stdin"
      end if
 
-     simple_cat(self)
+     open(unit=self%input_unit, file=self%filename, access='STREAM', form='UNFORMATTED')
+
+     if (simple_cat(self)) then
+        ok = .false.
+     end if
 
      if (self%input_unit /= 5) then
-        close(self%input_unit
+        close(unit=self%input_unit)
      end if
 
+     argind = argind + 1
+     if (argind > iargc()) then
+        call exit(merge(0, 1, ok))
+     end if
   end do
+
  
 end program

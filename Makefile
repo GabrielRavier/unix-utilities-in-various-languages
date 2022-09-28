@@ -34,7 +34,7 @@ bin/mv:
 
 bin/cat: cat/cat.f90
 > @mkdir -p bin
-> gfortran cat/cat.f90 -o bin/cat -Jcat
+> gfortran -ggdb3 cat/f90getopt.F90 cat/cat.f90 -o bin/cat -Jcat
 
 test: all
 > ./tests/run_tests.sh
