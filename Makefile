@@ -26,18 +26,18 @@ MAKEFLAGS += --no-builtin-rules
 
 .PHONY: bin/mv
 
-all: bin/mv bin/ls
+all: bin/mv bin/cat
 
 bin/mv:
 > +cmake -S mv -B mv/build
 > +cmake --build mv/build
 
-bin/ls: ls/ls.f90
+bin/cat: cat/cat.f90
 > @mkdir -p bin
-> gfortran ls/ls.f90 -o bin/ls -Jls
+> gfortran cat/cat.f90 -o bin/cat -Jcat
 
 test: all
 > ./tests/run_tests.sh
 
 clean:
-> rm -rf ./bin/ ./mv/build/ ./ls/ls.mod
+> rm -rf ./bin/ ./mv/build/ ./cat/cat.mod
