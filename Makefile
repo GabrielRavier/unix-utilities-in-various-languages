@@ -33,10 +33,11 @@ bin/mv:
 > +cmake --build mv/build
 
 bin/ls: ls/ls.f90
-> gfortran ls/ls.f90 -o bin/ls
+> @mkdir -p bin
+> gfortran ls/ls.f90 -o bin/ls -Jls
 
 test: all
 > ./tests/run_tests.sh
 
 clean:
-> rm -r ./mv/build/ ./bin/
+> rm -rf ./bin/ ./mv/build/ ./ls/ls.mod
