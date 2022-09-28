@@ -10,7 +10,7 @@ trap_exit () {
 
 trap trap_exit ERR
 
-for i in ./mv/FreeBSD-legacy_test.sh
+for i in ./mv/FreeBSD-legacy_test.sh ./cat/my_tests.sh
 do
     eval "$i" || echo "Test '$i' failed" &
 done

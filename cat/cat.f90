@@ -60,7 +60,7 @@ contains
        end if
 
        write(12) tmp
-       
+
     end do
 
   end function simple_cat
