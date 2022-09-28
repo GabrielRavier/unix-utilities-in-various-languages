@@ -11,16 +11,6 @@ contains
 
   subroutine setup(self)
     type (state) :: self
-    integer(4) :: status
-    integer(4), dimension(13) :: buff
-
-    call fstat(6, buff, status)
-
-    if (status /= 0) then
-       call perror("standard output")
-       call exit(1)
-    end if
-
   end subroutine setup
 
   function simple_cat(self) result(success)
