@@ -26,11 +26,14 @@ MAKEFLAGS += --no-builtin-rules
 
 .PHONY: bin/mv
 
-all: bin/mv
+all: bin/mv bin/ls
 
 bin/mv:
 > +cmake -S mv -B mv/build
 > +cmake --build mv/build
+
+bin/ls: ls/ls.f90
+> gfortran ls/ls.f90 -o bin/ls
 
 test: all
 > ./tests/run_tests.sh
